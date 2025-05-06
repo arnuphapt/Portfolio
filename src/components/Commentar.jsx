@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { getDocs, addDoc, collection, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase-comment';
-import { MessageCircle, UserCircle2, Loader2, AlertCircle, Send, ImagePlus, X } from 'lucide-react';
+import { db } from '../firebase-comment';
+import { MessageCircle, UserCircle2, Loader2, AlertCircle, Send } from 'lucide-react';
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -12,18 +11,9 @@ const Comment = memo(({ comment, formatDate, index }) => (
         
     >
         <div className="flex items-start gap-3 ">
-            {comment.profileImage ? (
-                <img
-                    src={comment.profileImage}
-                    alt={`${comment.userName}'s profile`}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-indigo-500/30"
-                    loading="lazy"
-                />
-            ) : (
-                <div className="p-2 rounded-full bg-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500/30 transition-colors">
-                    <UserCircle2 className="w-5 h-5" />
-                </div>
-            )}
+            <div className="p-2 rounded-full bg-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500/30 transition-colors">
+                <UserCircle2 className="w-5 h-5" />
+            </div>
             <div className="flex-grow min-w-0">
                 <div className="flex items-center justify-between gap-4 mb-2">
                     <h4 className="font-medium text-white truncate">{comment.userName}</h4>
@@ -40,21 +30,7 @@ const Comment = memo(({ comment, formatDate, index }) => (
 const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
     const [newComment, setNewComment] = useState('');
     const [userName, setUserName] = useState('');
-    const [imagePreview, setImagePreview] = useState(null);
-    const [imageFile, setImageFile] = useState(null);
     const textareaRef = useRef(null);
-    const fileInputRef = useRef(null);
-
-    const handleImageChange = useCallback((e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) return;
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => setImagePreview(reader.result);
-            reader.readAsDataURL(file);
-        }
-    }, []);
 
     const handleTextareaChange = useCallback((e) => {
         setNewComment(e.target.value);
@@ -68,13 +44,10 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
         e.preventDefault();
         if (!newComment.trim() || !userName.trim()) return;
         
-        onSubmit({ newComment, userName, imageFile });
+        onSubmit({ newComment, userName });
         setNewComment('');
-        setImagePreview(null);
-        setImageFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    }, [newComment, userName, imageFile, onSubmit]);
+    }, [newComment, userName, onSubmit]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -85,7 +58,7 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
                 <input
                     type="text"
                     value={userName}
-                    onChange={(e) => setUserName(e.target.value)}z
+                    onChange={(e) => setUserName(e.target.value)}
                     placeholder="Enter your name"
                     className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
                     required
@@ -104,56 +77,6 @@ const CommentForm = memo(({ onSubmit, isSubmitting, error }) => {
                     className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none min-h-[120px]"
                     required
                 />
-            </div>
-
-            <div className="space-y-2" data-aos="fade-up" data-aos-duration="1400">
-                <label className="block text-sm font-medium text-white">
-                    Profile Photo <span className="text-gray-400">(optional)</span>
-                </label>
-                <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-xl">
-                    {imagePreview ? (
-                        <div className="flex items-center gap-4">
-                            <img
-                                src={imagePreview}
-                                alt="Profile preview"
-                                className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500/50"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setImagePreview(null);
-                                    setImageFile(null);
-                                    if (fileInputRef.current) fileInputRef.current.value = '';
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all group"
-                            >
-                                <X className="w-4 h-4" />
-                                <span>Remove Photo</span>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="w-full" >
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageChange}
-                                accept="image/*"
-                                className="hidden"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition-all border border-dashed border-indigo-500/50 hover:border-indigo-500 group"
-                            >
-                                <ImagePlus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                <span>Choose Profile Photo</span>
-                            </button>
-                            <p className="text-center text-gray-400 text-sm mt-2">
-                                Max file size: 5MB
-                            </p>
-                        </div>
-                    )}
-                </div>
             </div>
 
             <button
@@ -207,23 +130,15 @@ const Komentar = () => {
         });
     }, []);
 
-    const uploadImage = useCallback(async (imageFile) => {
-        if (!imageFile) return null;
-        const storageRef = ref(storage, `profile-images/${Date.now()}_${imageFile.name}`);
-        await uploadBytes(storageRef, imageFile);
-        return getDownloadURL(storageRef);
-    }, []);
-
-    const handleCommentSubmit = useCallback(async ({ newComment, userName, imageFile }) => {
+    const handleCommentSubmit = useCallback(async ({ newComment, userName }) => {
         setError('');
         setIsSubmitting(true);
         
         try {
-            const profileImageUrl = await uploadImage(imageFile);
             await addDoc(collection(db, 'portfolio-comments'), {
                 content: newComment,
                 userName,
-                profileImage: profileImageUrl,
+                profileImage: null,
                 createdAt: serverTimestamp(),
             });
         } catch (error) {
@@ -232,7 +147,7 @@ const Komentar = () => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [uploadImage]);
+    }, []);
 
     const formatDate = useCallback((timestamp) => {
         if (!timestamp) return '';
@@ -274,11 +189,11 @@ const Komentar = () => {
                 </div>
             )}
             
-            <div >
+            <div>
                 <CommentForm onSubmit={handleCommentSubmit} isSubmitting={isSubmitting} error={error} />
             </div>
 
-            <div className="space-y-4 h-[300px] overflow-y-auto custom-scrollbar" data-aos="fade-up" data-aos-delay="200">
+            <div className="space-y-4 h-[400px] overflow-y-auto custom-scrollbar" data-aos="fade-up" data-aos-delay="200">
                 {comments.length === 0 ? (
                     <div className="text-center py-8" data-aos="fade-in">
                         <UserCircle2 className="w-12 h-12 text-indigo-400 mx-auto mb-3 opacity-50" />
