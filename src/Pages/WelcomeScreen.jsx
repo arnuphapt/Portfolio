@@ -160,7 +160,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
                   <div className="relative flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
                     <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
                     <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                      <TypewriterEffect text="arnuphapt.vercel.app" />
+                      <TypewriterEffect text="arnuphapt.portfolio" />
                     </span>
                   </div>
                 </a>
