@@ -101,18 +101,18 @@ function a11yProps(index) {
 }
 
 const techStacks = [
-  { icon: "html.svg", language: "HTML" },
-  { icon: "css.svg", language: "CSS" },
-  { icon: "javascript.svg", language: "JavaScript" },
-  { icon: "tailwind.svg", language: "Tailwind CSS" },
+  { icon: "nextjs.svg", language: "NextJs" },
   { icon: "reactjs.svg", language: "ReactJS" },
+  { icon: "javascript.svg", language: "JavaScript" },
+  { icon: "typescript.svg", language: "Typescript" },
+  { icon: "tailwind.svg", language: "Tailwind CSS" },
   { icon: "vite.svg", language: "Vite" },
   { icon: "nodejs.svg", language: "Node JS" },
-  { icon: "bootstrap.svg", language: "Bootstrap" },
+  { icon: "nestjs.svg", language: "NestJs" },
   { icon: "firebase.svg", language: "Firebase" },
-  { icon: "MUI.svg", language: "Material UI" },
+  { icon: "mongodb.svg", language: "MongoDB" },
+  { icon: "gitlab.svg", language: "GitLab" },
   { icon: "vercel.svg", language: "Vercel" },
-  { icon: "SweetAlert.svg", language: "SweetAlert2" },
 
 ];
 

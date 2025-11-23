@@ -3,6 +3,7 @@ import { Github, Linkedin, Mail, ExternalLink, Instagram, Sparkles } from "lucid
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+import { Javascript } from "@mui/icons-material"
 
 // Memoized Components
 const StatusBadge = memo(() => (
@@ -77,8 +78,8 @@ const SocialLink = memo(({ icon: Icon, link }) => (
 const TYPING_SPEED = 100;
 const ERASING_SPEED = 50;
 const PAUSE_DURATION = 2000;
-const WORDS = ["Computer science Student", "KKU Student","CP Student"];
-const TECH_STACK = ["Next.js", "Javascript", "Node.js", "Tailwind", "UX/UI"];
+const WORDS = ["Computer science Student", "Frontend dev","CP Student"];
+const TECH_STACK = ["Next.js", "Typescript", "Node.js", "Nest.js", "shadcn/ui"];
 const SOCIAL_LINKS = [
   { icon: Github, link: "https://github.com/arnuphapt" },
   { icon: Linkedin, link: "https://www.linkedin.com/in/arnuphap-thaiwong-a16662359/" },
