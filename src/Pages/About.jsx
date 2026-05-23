@@ -1,4 +1,4 @@
-import React, { useEffect, memo, useMemo } from "react"
+import React, { useEffect, memo, useMemo, useState } from "react"
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles, UserCheck } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
@@ -112,23 +112,38 @@ const StatCard = memo(({ icon: Icon, color, value, label, description, animation
   </div>
 ));
 
-const AboutPage = () => {
-  // Memoized calculations
-  const { totalProjects, totalCertificates, YearExperience } = useMemo(() => {
-    const storedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
-    const storedCertificates = JSON.parse(localStorage.getItem("certificates") || "[]");
-    
-    const startDate = new Date("2025-05-04");
-    const today = new Date();
-    const experience = today.getFullYear() - startDate.getFullYear() -
-      (today < new Date(today.getFullYear(), startDate.getMonth(), startDate.getDate()) ? 1 : 0);
+const readStats = () => {
+  const storedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+  const storedCertificates = JSON.parse(localStorage.getItem("certificates") || "[]");
+  const startDate = new Date("2025-05-04");
+  const today = new Date();
+  const experience = today.getFullYear() - startDate.getFullYear() -
+    (today < new Date(today.getFullYear(), startDate.getMonth(), startDate.getDate()) ? 1 : 0);
+  return {
+    totalProjects: storedProjects.length,
+    totalCertificates: storedCertificates.length,
+    YearExperience: experience,
+  };
+};
 
-    return {
-      totalProjects: storedProjects.length,
-      totalCertificates: storedCertificates.length,
-      YearExperience: experience
+const AboutPage = () => {
+  const [counts, setCounts] = useState(readStats);
+
+  // Re-read when Portofolio.jsx writes to localStorage after fetching
+  useEffect(() => {
+    const handleStorage = () => setCounts(readStats());
+    window.addEventListener("storage", handleStorage);
+
+    // Also poll once after short delay to catch same-tab writes
+    const t = setTimeout(() => setCounts(readStats()), 2000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      clearTimeout(t);
     };
   }, []);
+
+  const { totalProjects, totalCertificates, YearExperience } = counts;
 
   // Optimized AOS initialization
   useEffect(() => {
@@ -214,8 +229,8 @@ const AboutPage = () => {
               data-aos="fade-right"
               data-aos-duration="1500"
             >
-              มหาวิทยาลัยขอนแก่น คณะวิทยาลัยการคอมพิวเตอร์ สาขาวิทยาการคอมพิวเตอร์
-              มีความสนใจด้าน " Frontend Developer " ชอบที่จะเรียนรู้เครื่องมือๆใหม่ เพื่อนำมาพัฒนาระบบให้มีลูกเล่นและมีความน่าสนใจ
+              Computer Science student at Khon Kaen University, Thailand.
+              Full Stack Developer — always exploring new tools and frameworks to build fast, efficient, and visually compelling systems.
             </p>
 
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4 lg:gap-4 lg:px-0 w-full">

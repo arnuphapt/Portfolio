@@ -103,16 +103,18 @@ function a11yProps(index) {
 const techStacks = [
   { icon: "nextjs.svg", language: "NextJs" },
   { icon: "reactjs.svg", language: "ReactJS" },
-  { icon: "javascript.svg", language: "JavaScript" },
   { icon: "typescript.svg", language: "Typescript" },
   { icon: "tailwind.svg", language: "Tailwind CSS" },
   { icon: "vite.svg", language: "Vite" },
   { icon: "nodejs.svg", language: "Node JS" },
   { icon: "nestjs.svg", language: "NestJs" },
+    { icon: "mysql.svg", language: "MySQL" },
+  { icon: "postgresql.svg", language: "PostgreSQL" },
   { icon: "firebase.svg", language: "Firebase" },
-  { icon: "mongodb.svg", language: "MongoDB" },
+  { icon: "supabase.svg", language: "Supabase" },
   { icon: "gitlab.svg", language: "GitLab" },
-  { icon: "vercel.svg", language: "Vercel" },
+
+
 
 ];
 
@@ -123,8 +125,7 @@ export default function FullWidthTabs() {
   const [certificates, setCertificates] = useState([]);
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
-  const isMobile = window.innerWidth < 768;
-  const initialItems = isMobile ? 4 : 6;
+  const [initialItems] = useState(() => window.innerWidth < 768 ? 4 : 6);
 
   useEffect(() => {
     // Initialize AOS once
@@ -307,14 +308,14 @@ export default function FullWidthTabs() {
                 ))}
               </div>
             </div>
-            {projects.length > initialItems && (
+            {projects.length > initialItems ? (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
                   onClick={() => toggleShowMore('projects')}
                   isShowingMore={showAllProjects}
                 />
               </div>
-            )}
+            ) : null}
           </TabPanel>
 
           <TabPanel value={value} index={1} dir={theme.direction}>
@@ -331,14 +332,14 @@ export default function FullWidthTabs() {
                 ))}
               </div>
             </div>
-            {certificates.length > initialItems && (
+            {certificates.length > initialItems ? (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
                   onClick={() => toggleShowMore('certificates')}
                   isShowingMore={showAllCertificates}
                 />
               </div>
-            )}
+            ) : null}
           </TabPanel>
 
           <TabPanel value={value} index={2} dir={theme.direction}>

@@ -26,7 +26,7 @@ const MainTitle = memo(() => (
       <span className="relative inline-block">
         <span className="absolute -inset-2 bg-gradient-to-r from-cyan-500 to-blue-500 blur-2xl opacity-20"></span>
         <span className="relative bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-          Frontend
+          Full-stack
         </span>
       </span>
       <br />
@@ -78,8 +78,8 @@ const SocialLink = memo(({ icon: Icon, link }) => (
 const TYPING_SPEED = 100;
 const ERASING_SPEED = 50;
 const PAUSE_DURATION = 2000;
-const WORDS = ["Computer science Student", "Frontend dev","CP Student"];
-const TECH_STACK = ["Next.js", "Typescript", "Node.js", "Nest.js", "shadcn/ui"];
+const WORDS = ["Computer science Student", "Full-stack Developer", "CP Student"];
+const TECH_STACK = ["Next.js", "Typescript", "Nest.js", "MySql", "Postgresql"];
 const SOCIAL_LINKS = [
   { icon: Github, link: "https://github.com/arnuphapt" },
   { icon: Linkedin, link: "https://www.linkedin.com/in/arnuphap-thaiwong-a16662359/" },
@@ -162,7 +162,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-[#030014] overflow-hidden" id="Home">
       <div className={`relative z-10 transition-all duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}>
-        <div className="container mx-auto px-[5%] sm:px-6 lg:px-[0%] min-h-screen">
+        <div className="container mx-auto px-[5%] lg:px-[5%] min-h-screen">
           <div className="flex flex-col lg:flex-row items-center justify-center h-screen md:justify-between gap-0 sm:gap-12 lg:gap-20">
             {/* Left Column */}
             <div className="w-full lg:w-1/2 space-y-6 sm:space-y-8 text-left lg:text-left order-1 lg:order-1 lg:mt-0"
@@ -180,12 +180,7 @@ const Home = () => {
                   <span className="w-[3px] h-6 bg-gradient-to-t from-cyan-500 to-blue-500 ml-1 animate-blink"></span>
                 </div>
 
-                {/* Description */}
-                <p className="text-base md:text-lg text-gray-400 max-w-xl leading-relaxed font-light"
-                  data-aos="fade-up"
-                  data-aos-delay="1000">
-                  Modern, User friendly, stylish, consistency
-                </p>
+
 
                 {/* Tech Stack */}
                 <div className="flex flex-wrap gap-3 justify-start" data-aos="fade-up" data-aos-delay="1200">

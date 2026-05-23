@@ -1,210 +1,195 @@
-import React, { useState, useEffect } from "react";
-import { Share2, User, Mail, MessageSquare, Send } from "lucide-react";
-import { Link } from "react-router-dom";
-import SocialLinks from "../components/SocialLinks";
-import Komentar from "../components/Commentar";
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from "react";
+import { Github, Instagram, Linkedin, Mail, MapPin, ExternalLink, ArrowUpRight } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
+const SOCIAL = [
+  {
+    name: "LinkedIn",
+    handle: "Arnuphap Thaiwong",
+    sub: "Let's connect professionally",
+    url: "https://www.linkedin.com/in/arnuphap-thaiwong-a16662359/",
+    Icon: Linkedin,
+    color: "#0A66C2",
+    glow: "rgba(10,102,194,0.35)",
+    gradient: "from-[#0A66C2]/20 to-[#0077B5]/10",
+    border: "hover:border-[#0A66C2]/50",
+  },
+  {
+    name: "GitHub",
+    handle: "@arnuphapt",
+    sub: "Check out my code",
+    url: "https://github.com/arnuphapt",
+    Icon: Github,
+    color: "#e6edf3",
+    glow: "rgba(230,237,243,0.2)",
+    gradient: "from-[#30363d]/60 to-[#161b22]/60",
+    border: "hover:border-white/30",
+  },
+  {
+    name: "Instagram",
+    handle: "@parxdice_",
+    sub: "Follow my journey",
+    url: "https://www.instagram.com/parxdice_",
+    Icon: Instagram,
+    color: "#E4405F",
+    glow: "rgba(228,64,95,0.3)",
+    gradient: "from-[#833AB4]/20 via-[#E4405F]/20 to-[#FCAF45]/10",
+    border: "hover:border-[#E4405F]/40",
+  },
+  {
+    name: "Email",
+    handle: "arnuphap.t@kkumail.com",
+    sub: "Drop me a message",
+    url: "mailto:arnuphap.t@kkumail.com",
+    Icon: Mail,
+    color: "#06b6d4",
+    glow: "rgba(6,182,212,0.3)",
+    gradient: "from-[#06b6d4]/20 to-[#3b82f6]/10",
+    border: "hover:border-cyan-500/40",
+  },
+];
+
 const ContactPage = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hovered, setHovered] = useState(null);
 
   useEffect(() => {
-    AOS.init({
-      once: false,
-    });
+    AOS.init({ once: false });
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    Swal.fire({
-      title: 'Sending Message...',
-      html: 'Please wait while we send your message',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      // Get form data
-      const form = e.target;
-      const formData = new FormData(form);
-
-      // Submit form
-      await form.submit();
-
-      // Show success message
-      Swal.fire({
-        title: 'Success!',
-        text: 'Your message has been sent successfully!',
-        icon: 'success',
-        confirmButtonColor: '#6366f1',
-        timer: 2000,
-        timerProgressBar: true
-      });
-
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
-      });
-    } catch (error) {
-      Swal.fire({
-        title: 'Error!',
-        text: 'Something went wrong. Please try again later.',
-        icon: 'error',
-        confirmButtonColor: '#6366f1'
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
-    <>
-      <div className="text-center lg:mt-[5%] mt-10 mb-2 sm:px-0 px-[5%]">
+    <section id="Contact" className="relative overflow-hidden px-[5%] lg:px-[10%] pt-16 pb-24">
+
+      {/* Ambient background blobs */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-[-10%] top-[20%] h-[400px] w-[400px] rounded-full bg-cyan-500/5 blur-[100px]" />
+        <div className="absolute right-[-5%] bottom-[10%] h-[350px] w-[350px] rounded-full bg-blue-600/8 blur-[100px]" />
+      </div>
+
+      {/* Header */}
+      <div className="text-center mb-16">
         <h2
           data-aos="fade-down"
-          data-aos-duration="1000"
-          className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500"
+          data-aos-duration="800"
+          className="inline-block text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500"
         >
-
-            Contact Me
+          Contact Me
         </h2>
         <p
           data-aos="fade-up"
-          data-aos-duration="1100"
-          className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2"
+          data-aos-duration="900"
+          className="mt-3 text-slate-400 text-sm md:text-base max-w-xl mx-auto"
         >
           Got a question? Send me a message, and I'll get back to you soon.
         </p>
       </div>
 
-      <div
-        className="h-auto py-10 flex items-center justify-center px-[5%] md:px-0"
-        id="Contact"
-      >
-        <div className="container px-[1%] grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-[45%_55%] 2xl:grid-cols-[35%_65%] gap-12">
-          
-          <div
-            data-aos="fade-right"
-            data-aos-duration="1200"
-            className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-5 py-10 sm:p-10 transform transition-all duration-300 hover:shadow-[#6366f1]/10"
-          >
-            
-            <div className="mb-10 pb-6 border-b border-white/10 flex justify-center space-x-6">
-              <SocialLinks />
-            </div>
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h2 className="text-4xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">
-                  Get in Touch
-                </h2>
-                <p className="text-gray-400">
-                  Have something to discuss? Send me a message and let's talk.
-                </p>
-              </div>
-              <Share2 className="w-10 h-10 text-cyan-500 opacity-70" />
-            </div>
+      {/* 2-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
 
-            <form 
-              action="https://formsubmit.co/arnuphap.t@kkumail.com"
-              method="POST"
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-              {/* FormSubmit Configuration */}
-              <input type="hidden" name="_template" value="table" />
-              <input type="hidden" name="_captcha" value="false" />
+        {/* LEFT — Status + info */}
+        <div data-aos="fade-right" data-aos-duration="1000" className="space-y-8">
 
-              <div
-                data-aos="fade-up"
-                data-aos-delay="100"
-                className="relative group"
-              >
-                <User className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Your Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className="w-full p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all duration-300 hover:border-cyan-500/30 disabled:opacity-50"
-                  required
-                />
-              </div>
-              <div
-                data-aos="fade-up"
-                data-aos-delay="200"
-                className="relative group"
-              >
-                <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Your Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className="w-full p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all duration-300 hover:border-cyan-500/30 disabled:opacity-50"
-                  required
-                />
-              </div>
-              <div
-                data-aos="fade-up"
-                data-aos-delay="300"
-                className="relative group"
-              >
-                <MessageSquare className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-cyan-500 transition-colors" />
-                <textarea
-                  name="message"
-                  placeholder="Your Message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className="w-full resize-none p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all duration-300 hover:border-cyan-500/30 h-[9.9rem] disabled:opacity-50"
-                  required
-                />
-              </div>
-              <button
-                data-aos="fade-up"
-                data-aos-delay="400"
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-cyan-500/20 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                <Send className="w-5 h-5" />
-                {isSubmitting ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
-
+          {/* Main text */}
+          <div className="space-y-4">
+            <h3 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+              Let's build something
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                great together.
+              </span>
+            </h3>
+            <p className="text-gray-400 text-base leading-relaxed max-w-md">
+              Available for Onsite, Hybrid, or Work-from-Home positions. Ready to start within 1 week.
+              I&apos;m friendly, easy-going, and always up for a hangout — also a big dog &amp; cat lover. Feel free to reach out anytime!
+            </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-3 py-3 md:p-10 md:py-8 shadow-2xl transform transition-all duration-300 hover:shadow-[#6366f1]/10">
-            <Komentar />
+          {/* Info chips */}
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300">
+              <MapPin className="w-4 h-4 text-cyan-400" />
+              Khon Kaen & Bangkok, Thailand
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300">
+              <Mail className="w-4 h-4 text-cyan-400" />
+              arnuphap.t@kkumail.com
+            </div>
           </div>
+
+          {/* Divider */}
+          <div className="h-px w-full bg-gradient-to-r from-cyan-500/30 via-white/10 to-transparent" />
+
         </div>
+
+        {/* RIGHT — Social cards grid */}
+        <div
+          data-aos="fade-left"
+          data-aos-duration="1000"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
+          {SOCIAL.map((s, i) => (
+            <a
+              key={s.name}
+              href={s.url}
+              target={s.name !== "Email" ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              data-aos="fade-up"
+              data-aos-delay={i * 80}
+              data-aos-duration="700"
+              className={`group relative overflow-hidden rounded-2xl border border-white/10 ${s.border}
+                          bg-white/[0.03] backdrop-blur-sm p-5
+                          transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl`}
+              style={{
+                boxShadow: hovered === i ? `0 8px 40px ${s.glow}` : undefined,
+              }}
+            >
+              {/* Gradient fill on hover */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${s.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-400`} />
+
+              {/* Shine sweep */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent
+                                -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              </div>
+
+              <div className="relative flex flex-col gap-4">
+                {/* Icon + arrow row */}
+                <div className="flex items-start justify-between">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: `${s.color}18` }}
+                  >
+                    <s.Icon className="w-5 h-5" style={{ color: s.color }} />
+                  </div>
+                  <ExternalLink
+                    className="w-4 h-4 text-gray-600 group-hover:text-white/60
+                               translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0
+                               transition-all duration-300"
+                  />
+                </div>
+
+                {/* Text */}
+                <div>
+                  <div className="text-white font-semibold text-sm leading-tight">{s.handle}</div>
+                  <div className="text-gray-500 text-xs mt-1 group-hover:text-gray-400 transition-colors">{s.sub}</div>
+                </div>
+
+                {/* Platform name */}
+                <div
+                  className="text-xs font-medium tracking-widest uppercase"
+                  style={{ color: `${s.color}99` }}
+                >
+                  {s.name}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
       </div>
-    </>
+    </section>
   );
 };
 
