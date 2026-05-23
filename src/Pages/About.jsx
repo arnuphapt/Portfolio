@@ -2,6 +2,7 @@ import React, { useEffect, memo, useMemo, useState } from "react"
 import { FileText, Code, Award, Globe, ArrowUpRight, Sparkles, UserCheck } from "lucide-react"
 import AOS from 'aos'
 import 'aos/dist/aos.css'
+import TimelineSection from "../components/TimelineSection"
 
 // Memoized Components
 const Header = memo(() => (
@@ -266,6 +267,8 @@ const AboutPage = () => {
           </div>
         </a>
       </div>
+
+      <TimelineSection />
 
       <style jsx>{`
         @keyframes float {
