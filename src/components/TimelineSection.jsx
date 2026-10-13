@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Timeline } from "@/components/ui/timeline";
-import { GraduationCap, Briefcase, Code2, Building2 } from "lucide-react";
-import AOS from "aos";
-import { useEffect } from "react";
+import { GraduationCap, Code2, Building2 } from "lucide-react";
+import { HudStrip } from "./hud";
+import { useReveal } from "../lib/useReveal";
 
 const TABS = ["All", "Education", "Work", "Internship"];
+
+const Tag = ({ children }) => (
+  <span className="chip !px-2 !py-0.5 !text-[10px]">{children}</span>
+);
 
 const ALL_ITEMS = [
   {
@@ -19,9 +23,7 @@ const ALL_ITEMS = [
     content: (
       <div className="flex flex-wrap gap-2 mt-1">
         {["React", "Next.js", "NestJS", "TypeScript", "TailwindCSS"].map(tag => (
-          <span key={tag} className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs">
-            {tag}
-          </span>
+          <Tag key={tag}>{tag}</Tag>
         ))}
       </div>
     ),
@@ -38,9 +40,7 @@ const ALL_ITEMS = [
     content: (
       <div className="flex flex-wrap gap-2 mt-1">
         {["Network", "IT Infrastructure", "System Admin"].map(tag => (
-          <span key={tag} className="px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs">
-            {tag}
-          </span>
+          <Tag key={tag}>{tag}</Tag>
         ))}
       </div>
     ),
@@ -57,9 +57,7 @@ const ALL_ITEMS = [
     content: (
       <div className="flex flex-wrap gap-2 mt-1">
         {["Algorithms", "Data Structures", "Web Dev", "Database", "CP"].map(tag => (
-          <span key={tag} className="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs">
-            {tag}
-          </span>
+          <Tag key={tag}>{tag}</Tag>
         ))}
       </div>
     ),
@@ -68,50 +66,51 @@ const ALL_ITEMS = [
 
 const TimelineSection = () => {
   const [activeTab, setActiveTab] = useState("All");
-
-  useEffect(() => {
-    AOS.init({ once: false });
-  }, []);
+  const headScope = useRef(null);
+  const listScope = useRef(null);
+  useReveal(headScope);
+  useReveal(listScope, [activeTab]);
 
   const filtered = activeTab === "All"
     ? ALL_ITEMS
     : ALL_ITEMS.filter(item => item.category === activeTab);
 
   return (
-    <div
-      data-aos="fade-up"
-      data-aos-duration="1000"
-      className="mt-24 px-[5%] sm:px-[5%] lg:px-[10%] pb-16"
-    >
+    <div className="mt-28">
+      <div ref={headScope}>
       {/* Header */}
-      <div className="text-center mb-10">
-        <h2 className="inline-block text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">
-          My Journey
+      <div data-reveal className="mb-10">
+        <HudStrip left="02.1 / JOURNEY" right={`${String(filtered.length).padStart(2, "0")} ENTRIES`} className="mb-8" />
+        <h2 className="display text-[clamp(2.2rem,5.5vw,4.25rem)]">
+          My <span className="contrast">Journey</span>
         </h2>
-        <p className="mt-2 text-gray-400 text-sm max-w-xl mx-auto">
+        <p className="mt-4 max-w-xl text-sm text-fg-2 sm:text-base">
           Education, work experience, and internships that shaped who I am.
         </p>
       </div>
 
       {/* Tab filter */}
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
+      <div data-reveal className="mb-10 flex flex-wrap gap-2">
         {TABS.map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 border
-              ${activeTab === tab
-                ? "bg-gradient-to-r from-cyan-500 to-blue-500 border-transparent text-white shadow-lg shadow-cyan-500/20"
-                : "border-white/10 text-gray-400 hover:border-white/20 hover:text-white bg-white/[0.03]"
-              }`}
+            aria-pressed={activeTab === tab}
+            className={`chip cursor-pointer transition-colors duration-200 ${
+              activeTab === tab
+                ? "!border-accent !text-accent"
+                : "hover:!border-hair-strong hover:!text-fg"
+            }`}
           >
             {tab}
           </button>
         ))}
       </div>
 
+      </div>
+
       {/* Timeline */}
-      <div className="max-w-2xl mx-auto">
+      <div ref={listScope} className="max-w-2xl">
         <Timeline
           items={filtered}
           variant="spacious"

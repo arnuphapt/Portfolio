@@ -37,8 +37,8 @@ const timelineConnectorVariants = cva("bg-border", {
     },
     status: {
       default: "bg-white/20",
-      completed: "bg-cyan-500",
-      active: "bg-cyan-500",
+      completed: "bg-white/25",
+      active: "bg-accent",
       pending: "bg-white/10",
       error: "bg-red-500",
     },
@@ -47,14 +47,14 @@ const timelineConnectorVariants = cva("bg-border", {
 });
 
 const timelineIconVariants = cva(
-  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 bg-[#030014] text-xs font-medium",
+  "flex h-6 w-6 shrink-0 items-center justify-center border bg-ink text-xs font-medium",
   {
     variants: {
       status: {
-        default: "border-white/20 text-gray-400",
-        completed: "border-cyan-500 bg-cyan-500 text-white",
-        active: "border-cyan-500 bg-[#030014] text-cyan-500 animate-pulse",
-        pending: "border-white/20 text-gray-500",
+        default: "border-white/20 text-fg-3",
+        completed: "border-white/30 bg-ink-2 text-fg-2",
+        active: "border-accent bg-ink text-accent",
+        pending: "border-white/20 text-fg-3",
         error: "border-red-500 bg-red-500 text-white",
       },
     },
@@ -68,7 +68,7 @@ function getStatusIcon(status) {
     case "active":
     case "pending": return <Clock className="h-3 w-3" />;
     case "error": return <X className="h-3 w-3" />;
-    default: return <div className="h-2 w-2 rounded-full bg-current" />;
+    default: return <div className="h-2 w-2 bg-current" />;
   }
 }
 
@@ -85,7 +85,7 @@ export function Timeline({
   const timelineContent = (
     <div className={cn(timelineVariants({ variant, orientation }), orientation === "horizontal" ? "pb-4" : "")}>
       {items.map((item, index) => (
-        <div key={item.id} className={cn(timelineItemVariants({ orientation }))}>
+        <div key={item.id} data-reveal className={cn(timelineItemVariants({ orientation }))}>
           {showConnectors && index < items.length - 1 && (
             <div className={cn(timelineConnectorVariants({ orientation, status: item.status }))} />
           )}
@@ -98,28 +98,28 @@ export function Timeline({
 
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             {showTimestamps && timestampPosition === "top" && item.timestamp && (
-              <time className="text-xs text-gray-500">{item.timestamp}</time>
+              <time className="hud">{item.timestamp}</time>
             )}
 
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-white leading-tight text-sm">{item.title}</h3>
+              <h3 className="font-display text-lg font-bold uppercase leading-tight tracking-tight text-fg [font-stretch:115%]">{item.title}</h3>
               {showTimestamps && timestampPosition === "inline" && item.timestamp && (
-                <time className="shrink-0 text-xs text-gray-500">{item.timestamp}</time>
+                <time className="hud shrink-0">{item.timestamp}</time>
               )}
             </div>
 
             {item.subtitle && (
-              <p className="text-xs text-cyan-400 font-medium">{item.subtitle}</p>
+              <p className="text-sm font-medium text-fg-2">{item.subtitle}</p>
             )}
 
             {item.description && (
-              <p className="text-sm text-gray-400 leading-relaxed">{item.description}</p>
+              <p className="text-sm leading-relaxed text-fg-3">{item.description}</p>
             )}
 
             {item.content && <div className="mt-2">{item.content}</div>}
 
             {showTimestamps && timestampPosition === "bottom" && item.timestamp && (
-              <time className="text-xs text-gray-500">{item.timestamp}</time>
+              <time className="hud">{item.timestamp}</time>
             )}
           </div>
         </div>

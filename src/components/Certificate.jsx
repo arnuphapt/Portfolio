@@ -2,8 +2,10 @@ import React, { useState } from "react"
 import { Modal, IconButton, Box, Fade, Backdrop, Zoom, Typography } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import FullscreenIcon from "@mui/icons-material/Fullscreen"
+import { accentOf } from "../lib/accent"
 
-const Certificate = ({ ImgSertif }) => {
+// eslint-disable-next-line react/prop-types
+const Certificate = ({ ImgSertif, index }) => {
 	const [open, setOpen] = useState(false)
 
 	const handleOpen = () => {
@@ -18,16 +20,17 @@ const Certificate = ({ ImgSertif }) => {
 		<Box component="div" sx={{ width: "100%" }}>
 			{/* Thumbnail Container */}
 			<Box
-				className=""
+				className="group"
+				style={{ "--card-accent": accentOf(index) }}
 				sx={{
 					position: "relative",
 					overflow: "hidden",
-					borderRadius: 2,
-					boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-					transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+					borderRadius: 0,
+					border: "1px solid var(--rule)",
+					boxShadow: "none",
+					transition: "border-color 0.3s ease",
 					"&:hover": {
-						transform: "translateY(-5px)",
-						boxShadow: "0 12px 24px rgba(0,0,0,0.2)",
+						borderColor: "var(--rule-strong)",
 						"& .overlay": {
 							opacity: 1,
 						},
@@ -36,10 +39,14 @@ const Certificate = ({ ImgSertif }) => {
 							opacity: 1,
 						},
 						"& .certificate-image": {
-							filter: "contrast(1.05) brightness(1) saturate(1.1)",
+							filter: "grayscale(0) brightness(1)",
 						},
 					},
 				}}>
+				<span aria-hidden="true" className="acc-bar" />
+				<span aria-hidden="true" className="acc-badge" style={{ position: "absolute", top: 8, left: 8, zIndex: 3 }}>
+					{String((index ?? 0) + 1).padStart(2, "0")}
+				</span>
 				{/* Certificate Image with Initial Filter */}
 				<Box
 					sx={{
@@ -53,6 +60,7 @@ const Certificate = ({ ImgSertif }) => {
 							bottom: 0,
 							backgroundColor: "rgba(0, 0, 0, 0.1)",
 							zIndex: 1,
+							pointerEvents: "none",
 						},
 					}}>
 					<img
@@ -64,7 +72,7 @@ const Certificate = ({ ImgSertif }) => {
 							height: "250px", // Fixed height
 							display: "block",
 							objectFit: "cover",
-							filter: "contrast(1.10) brightness(0.9) saturate(1.1)",
+							filter: "grayscale(0.5) brightness(0.85)",
 							transition: "filter 0.3s ease",
 						}}
 						onClick={handleOpen}
@@ -84,6 +92,7 @@ const Certificate = ({ ImgSertif }) => {
 						transition: "all 0.3s ease",
 						cursor: "pointer",
 						zIndex: 2,
+						backgroundColor: "rgba(14,15,17,0.55)",
 					}}
 					onClick={handleOpen}>
 					{/* Hover Content */}
@@ -102,16 +111,17 @@ const Certificate = ({ ImgSertif }) => {
 						}}>
 						<FullscreenIcon
 							sx={{
-								fontSize: 40,
+								fontSize: 28,
 								mb: 1,
-								filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+								color: "var(--accent)",
 							}}
 						/>
 						<Typography
-							variant="h6"
 							sx={{
-								fontWeight: 600,
-								textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+								fontFamily: "var(--font-mono)",
+								fontSize: "11px",
+								letterSpacing: "0.14em",
+								textTransform: "uppercase",
 							}}>
 							View Certificate
 						</Typography>
@@ -129,8 +139,7 @@ const Certificate = ({ ImgSertif }) => {
 				BackdropProps={{
 					timeout: 300,
 					sx: {
-						backgroundColor: "rgba(0, 0, 0, 0.9)",
-						backdropFilter: "blur(5px)",
+						backgroundColor: "rgba(14, 15, 17, 0.94)",
 					},
 				}}
 				sx={{
@@ -164,12 +173,13 @@ const Certificate = ({ ImgSertif }) => {
 							right: 16,
 							top: 16,
 							color: "white",
-							bgcolor: "rgba(0,0,0,0.6)",
+							bgcolor: "var(--ink)",
+							border: "1px solid var(--rule-strong)",
+							borderRadius: 0,
 							zIndex: 1,
 							padding: 1,
 							"&:hover": {
-								bgcolor: "rgba(0,0,0,0.8)",
-								transform: "scale(1.1)",
+								bgcolor: "var(--ink-3)",
 							},
 						}}
 						size="large">

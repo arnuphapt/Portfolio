@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Code2, Github, Globe, User } from 'lucide-react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import { Cross, Hud, HudStrip } from '../components/hud';
 
-const TypewriterEffect = ({ text }) => {
-  const [displayText, setDisplayText] = useState('');
-  
+const LOAD_MS = 4000;
+
+const TypewriterEffect = ({ text, still }) => {
+  const [displayText, setDisplayText] = useState(still ? text : '');
+
   useEffect(() => {
+    if (still) return undefined;
     let index = 0;
     const timer = setInterval(() => {
       if (index <= text.length) {
@@ -17,183 +19,145 @@ const TypewriterEffect = ({ text }) => {
         clearInterval(timer);
       }
     }, 260);
-    
+
     return () => clearInterval(timer);
-  }, [text]);
+  }, [text, still]);
 
   return (
     <span className="inline-block">
       {displayText}
-      <span className="animate-pulse">|</span>
+      {still ? null : <span className="blink">_</span>}
     </span>
   );
 };
 
-const IconButton = ({ Icon }) => (
-  <div className="relative group hover:scale-110 transition-transform duration-300">
-    <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full blur opacity-30 group-hover:opacity-75 transition duration-300" />
-    <div className="relative p-2 sm:p-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
-      <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
-    </div>
+// eslint-disable-next-line react/prop-types
+const IconCell = ({ Icon, index }) => (
+  <div className="relative flex h-14 w-14 items-center justify-center border border-hair-strong bg-ink-2 sm:h-16 sm:w-16">
+    <span className="hud absolute left-1.5 top-1 !text-[9px]">{String(index + 1).padStart(2, '0')}</span>
+    <Icon className="h-5 w-5 text-fg sm:h-6 sm:w-6" strokeWidth={1.5} />
   </div>
 );
 
 const WelcomeScreen = ({ onLoadingComplete }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
-    AOS.init({
-      duration: 1000,
-      once: false,
-      mirror: false,
-    });
-
     const timer = setTimeout(() => {
       setIsLoading(false);
       setTimeout(() => {
         onLoadingComplete?.();
       }, 1000);
-    }, 4000);
-    
+    }, LOAD_MS);
+
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);
 
   const containerVariants = {
     exit: {
       opacity: 0,
-      scale: 1.1,
-      filter: "blur(10px)",
-      transition: {
-        duration: 0.8,
-        ease: "easeInOut",
-        when: "beforeChildren",
-        staggerChildren: 0.1
-      }
-    }
+      transition: reduced
+        ? { duration: 0 }
+        : { duration: 0.8, ease: [0.76, 0, 0.24, 1], when: "beforeChildren", staggerChildren: 0.08 },
+    },
   };
 
   const childVariants = {
+    hidden: { y: 24, opacity: 0 },
+    show: (i = 0) => ({
+      y: 0,
+      opacity: 1,
+      transition: reduced ? { duration: 0 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.12 },
+    }),
     exit: {
-      y: -20,
+      y: -16,
       opacity: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeInOut"
-      }
-    }
+      transition: reduced ? { duration: 0 } : { duration: 0.4, ease: "easeInOut" },
+    },
   };
+
+  const motionProps = (i) => ({ variants: childVariants, initial: reduced ? false : 'hidden', animate: 'show', custom: i });
 
   return (
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 bg-[#030014]"
-          initial={{ opacity: 0 }}
+          className="fixed inset-0 z-[70] bg-ink"
+          initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit="exit"
           variants={containerVariants}
         >
-          {/* Background Blobs - Matching the portfolio style */}
-          <div className="absolute inset-0">
-            <div className="absolute top-0 -left-4 w-72 md:w-96 h-72 md:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-            <div className="absolute top-0 -right-4 w-72 md:w-96 h-72 md:h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-            <div className="absolute -bottom-8 left-20 w-72 md:w-96 h-72 md:h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
-          </div>
-          
-          <div className="relative min-h-screen flex items-center justify-center px-4">
-            <div className="w-full max-w-4xl mx-auto">
-              {/* Icons */}
-              <motion.div 
-                className="flex justify-center gap-3 sm:gap-4 md:gap-8 mb-6 sm:mb-8 md:mb-12"
-                variants={childVariants}
-              >
-                {[Code2, User, Github].map((Icon, index) => (
-                  <div key={index} data-aos="fade-down" data-aos-delay={index * 200}>
-                    <IconButton Icon={Icon} />
-                  </div>
-                ))}
-              </motion.div>
+          {/* vignette + rail + grain */}
+          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 40%, rgba(0,0,0,0.6) 100%)" }} />
+          <div className="rail pointer-events-none absolute inset-y-0 left-1/2 hidden -translate-x-1/2 border-x border-hair !px-0 md:block" />
+          <div aria-hidden="true" className="grain" />
 
-              {/* Welcome Text */}
-              <motion.div 
-                className="text-center mb-6 sm:mb-8 md:mb-12"
-                variants={childVariants}
-              >
-                <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold space-y-2 sm:space-y-4">
-                  <div className="mb-2 sm:mb-4">
-                    <span data-aos="fade-right" data-aos-delay="200" className="inline-block px-2 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-                      Welcome
-                    </span>{' '}
-                    <span data-aos="fade-right" data-aos-delay="400" className="inline-block px-2 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-                      To
-                    </span>{' '}
-                    <span data-aos="fade-right" data-aos-delay="600" className="inline-block px-2 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-                      My
-                    </span>
-                  </div>
-                  <div>
-                    <span data-aos="fade-up" data-aos-delay="800" className="inline-block px-2 bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                      Portfolio
-                    </span>{' '}
-                    <span data-aos="fade-up" data-aos-delay="1000" className="inline-block px-2 bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                      Website
-                    </span>
-                  </div>
-                </h1>
-              </motion.div>
+          <div className="relative flex min-h-screen flex-col px-5 py-6 sm:px-8">
+            {/* top HUD */}
+            <motion.div {...motionProps(0)} className="mx-auto w-full max-w-rail">
+              <HudStrip left="ARNUPHAP / BOOT" right="EST. 2021" />
+            </motion.div>
 
-              {/* Website Link */}
-              <motion.div 
-                className="text-center"
-                variants={childVariants}
-                data-aos="fade-up"
-                data-aos-delay="1200"
-              >
-                <a
-                  href="https://arnuphapt.vercel.app"
-                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 rounded-full relative group hover:scale-105 transition-transform duration-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-md group-hover:blur-lg transition-all duration-300" />
-                  <div className="relative flex items-center gap-2 text-lg sm:text-xl md:text-2xl">
-                    <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-500" />
-                    <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                      <TypewriterEffect text="arnuphapt.portfolio" />
+            <div className="mx-auto flex w-full max-w-rail flex-1 items-center justify-center">
+              <div className="relative w-full max-w-4xl border-y border-hair py-10 sm:py-14">
+                <Cross className="left-0 top-0" />
+                <Cross className="right-0 top-0" />
+                <Cross className="bottom-0 left-0 !translate-y-1/2" />
+                <Cross className="bottom-0 right-0 !translate-y-1/2" />
+
+                {/* Icons */}
+                <motion.div {...motionProps(1)} className="mb-8 flex justify-center gap-3 sm:mb-10 sm:gap-4">
+                  {[Code2, User, Github].map((Icon, index) => (
+                    <IconCell key={index} Icon={Icon} index={index} />
+                  ))}
+                </motion.div>
+
+                {/* Welcome Text */}
+                <motion.div {...motionProps(2)} className="mb-8 text-center sm:mb-10">
+                  <h1 className="display text-[clamp(2rem,7.2vw,4.75rem)]">
+                    <span className="block">Welcome To My</span>
+                    <span className="mt-2 block">
+                      <span className="contrast text-accent">Portfolio</span> Website
                     </span>
-                  </div>
-                </a>
-              </motion.div>
+                  </h1>
+                </motion.div>
+
+                {/* Website Link */}
+                <motion.div {...motionProps(3)} className="text-center">
+                  <a
+                    href="https://arnuphapt.vercel.app"
+                    className="btn !normal-case !tracking-[0.08em]"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Globe className="h-4 w-4 text-fg-2" strokeWidth={1.5} />
+                    <TypewriterEffect text="arnuphapt.portfolio" still={reduced} />
+                  </a>
+                </motion.div>
+              </div>
             </div>
+
+            {/* bottom HUD: loading bar over the existing 4s delay */}
+            <motion.div {...motionProps(4)} className="mx-auto w-full max-w-rail">
+              <div className="mb-2 flex items-center justify-between">
+                <Hud>LOADING</Hud>
+                <Hud>SECTION 00</Hud>
+              </div>
+              <div className="h-px w-full bg-hair">
+                <div
+                  className="h-px bg-accent"
+                  style={{
+                    width: reduced ? '100%' : undefined,
+                    animation: reduced ? undefined : `welcome-load ${LOAD_MS}ms linear forwards`,
+                  }}
+                />
+              </div>
+            </motion.div>
           </div>
-          
-          {/* Animation styles */}
-          <style jsx>{`
-            @keyframes blob {
-              0% {
-                transform: translate(0px, 0px) scale(1);
-              }
-              33% {
-                transform: translate(30px, -50px) scale(1.1);
-              }
-              66% {
-                transform: translate(-20px, 20px) scale(0.9);
-              }
-              100% {
-                transform: translate(0px, 0px) scale(1);
-              }
-            }
-            .animate-blob {
-              animation: blob 10s infinite;
-            }
-            .animation-delay-2000 {
-              animation-delay: 2s;
-            }
-            .animation-delay-4000 {
-              animation-delay: 4s;
-            }
-          `}</style>
+
+          <style>{`@keyframes welcome-load { from { width: 0 } to { width: 100% } }`}</style>
         </motion.div>
       )}
     </AnimatePresence>

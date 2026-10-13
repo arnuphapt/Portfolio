@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { db, collection } from "../firebase";
 import { getDocs } from "firebase/firestore";
 import PropTypes from "prop-types";
@@ -11,61 +11,30 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import CardProject from "../components/CardProject";
 import TechStackIcon from "../components/TechStackIcon";
-import AOS from "aos";
-import "aos/dist/aos.css";
 import Certificate from "../components/Certificate";
+import { Section, HudStrip } from "../components/hud";
+import { useReveal } from "../lib/useReveal";
 import { Code, Award, Boxes } from "lucide-react";
+
+const pad = (n) => String(n).padStart(2, "0");
 
 // Separate ShowMore/ShowLess button component
 const ToggleButton = ({ onClick, isShowingMore }) => (
-  <button
-    onClick={onClick}
-    className="
-      px-3 py-1.5
-      text-slate-300 
-      hover:text-white 
-      text-sm 
-      font-medium 
-      transition-all 
-      duration-300 
-      ease-in-out
-      flex 
-      items-center 
-      gap-2
-      bg-white/5 
-      hover:bg-white/10
-      rounded-md
-      border 
-      border-white/10
-      hover:border-white/20
-      backdrop-blur-sm
-      group
-      relative
-      overflow-hidden
-    "
-  >
-    <span className="relative z-10 flex items-center gap-2">
-      {isShowingMore ? "See Less" : "See More"}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={`
-          transition-transform 
-          duration-300 
-          ${isShowingMore ? "group-hover:-translate-y-0.5" : "group-hover:translate-y-0.5"}
-        `}
-      >
-        <polyline points={isShowingMore ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
-      </svg>
-    </span>
-    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-500/50 transition-all duration-300 group-hover:w-full"></span>
+  <button onClick={onClick} className="btn group">
+    {isShowingMore ? "See Less" : "See More"}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="square"
+      className={`transition-transform duration-300 ${isShowingMore ? "group-hover:-translate-y-0.5" : "group-hover:translate-y-0.5"}`}
+    >
+      <polyline points={isShowingMore ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
+    </svg>
   </button>
 );
 
@@ -79,8 +48,10 @@ function TabPanel({ children, value, index, ...other }) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: { xs: 1, sm: 3 } }}>
-          <Typography>{children}</Typography>
+        <Box sx={{ pt: 3, px: 0 }}>
+          <Typography component="div" sx={{ fontFamily: "inherit", fontSize: "inherit", lineHeight: "inherit" }}>
+            {children}
+          </Typography>
         </Box>
       )}
     </div>
@@ -105,18 +76,53 @@ const techStacks = [
   { icon: "reactjs.svg", language: "ReactJS" },
   { icon: "typescript.svg", language: "Typescript" },
   { icon: "tailwind.svg", language: "Tailwind CSS" },
-  { icon: "vite.svg", language: "Vite" },
-  { icon: "nodejs.svg", language: "Node JS" },
   { icon: "nestjs.svg", language: "NestJs" },
-    { icon: "mysql.svg", language: "MySQL" },
+  { icon: "nodejs.svg", language: "Node JS" },
   { icon: "postgresql.svg", language: "PostgreSQL" },
-  { icon: "firebase.svg", language: "Firebase" },
+  { icon: "mysql.svg", language: "MySQL" },
   { icon: "supabase.svg", language: "Supabase" },
-  { icon: "gitlab.svg", language: "GitLab" },
+  { icon: "firebase.svg", language: "Firebase" },
+  { icon: "docker.svg", language: "Docker" },
+  { icon: "kubernetes.svg", language: "Kubernetes" },
 
 
 
 ];
+
+// MUI tab strip restyled to the instrument language (square, hairline, mono, blue active bar)
+const tabsSx = {
+  minHeight: "64px",
+  "& .MuiTab-root": {
+    fontFamily: "var(--font-mono)",
+    fontSize: "11px",
+    fontWeight: 400,
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.5)",
+    minHeight: "64px",
+    padding: "14px 0",
+    margin: 0,
+    borderRadius: 0,
+    borderRight: "1px solid var(--rule)",
+    transition: "color 0.25s, background-color 0.25s",
+    "&:last-of-type": { borderRight: 0 },
+    "&:hover": {
+      color: "#fff",
+      backgroundColor: "var(--ink-3)",
+    },
+    "&.Mui-selected": {
+      color: "#fff",
+      "& .lucide": { color: "var(--tab-accent)" },
+    },
+    "& .lucide": { marginBottom: "6px" },
+  },
+  "& .MuiTabs-indicator": {
+    top: 0,
+    bottom: "auto",
+    height: "2px",
+    backgroundColor: "var(--tab-accent)",
+  },
+};
 
 export default function FullWidthTabs() {
   const theme = useTheme();
@@ -126,13 +132,6 @@ export default function FullWidthTabs() {
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
   const [initialItems] = useState(() => window.innerWidth < 768 ? 4 : 6);
-
-  useEffect(() => {
-    // Initialize AOS once
-    AOS.init({
-      once: false, // This will make animations occur only once
-    });
-  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -148,7 +147,7 @@ export default function FullWidthTabs() {
         id: doc.id,
         ...doc.data(),
         TechStack: doc.data().TechStack || [],
-      }));
+      })).sort((a, b) => (a.Order ?? 999) - (b.Order ?? 999));
 
       const certificateData = certificateSnapshot.docs.map((doc) => doc.data());
 
@@ -182,131 +181,86 @@ export default function FullWidthTabs() {
   const displayedProjects = showAllProjects ? projects : projects.slice(0, initialItems);
   const displayedCertificates = showAllCertificates ? certificates : certificates.slice(0, initialItems);
 
+  const headScope = useRef(null);
+  const bodyScope = useRef(null);
+  useReveal(headScope);
+  useReveal(bodyScope, [value, displayedProjects.length, displayedCertificates.length]);
+
   return (
-    <div className="md:px-[10%] px-[5%] w-full sm:mt-0 mt-[3rem] bg-[#030014] overflow-hidden" id="Portofolio">
-      {/* Header section - unchanged */}
-      <div className="text-center pb-10" data-aos="fade-up" data-aos-duration="1000">
-        <h2 className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500">
-            Portfolio Showcase
-        </h2>
-        <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2">
-          Explore my journey through projects, certifications, and technical expertise. 
-          Each section represents a milestone in my continuous learning path.
-        </p>
+    <Section id="Portofolio" className="pb-24 pt-6">
+      <div ref={headScope}>
+        <div data-reveal className="mb-12">
+          <HudStrip left="03 / PORTFOLIO" right={`${pad(projects.length)} PROJECTS / ${pad(certificates.length)} CERTS`} />
+        </div>
+        <div className="mb-12 max-w-3xl">
+          <h2 data-reveal className="display text-[clamp(2.2rem,5.6vw,4.5rem)]">
+            Portfolio <span className="contrast">Showcase</span>
+          </h2>
+          <p data-reveal className="mt-4 max-w-2xl text-sm text-fg-2 md:text-base">
+            Explore my journey through projects, certifications, and technical expertise.
+            Each section represents a milestone in my continuous learning path.
+          </p>
+        </div>
       </div>
 
       <Box sx={{ width: "100%" }}>
-        {/* AppBar and Tabs section - unchanged */}
         <AppBar
           position="static"
           elevation={0}
           sx={{
             bgcolor: "transparent",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            borderRadius: "20px",
-            position: "relative",
-            overflow: "hidden",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: "linear-gradient(180deg, rgba(9, 180, 214, 0.03) 0%, rgba(58, 131, 246, 0.03) 100%)",
-              backdropFilter: "blur(10px)",
-              zIndex: 0,
-            },
+            backgroundImage: "none",
+            border: "1px solid var(--rule-strong)",
+            borderRadius: 0,
+            boxShadow: "none",
           }}
-          className="md:px-4"
         >
-          {/* Tabs remain unchanged */}
           <Tabs
             value={value}
             onChange={handleChange}
-            textColor="secondary"
-            indicatorColor="secondary"
+            textColor="inherit"
             variant="fullWidth"
-            sx={{
-              // Existing styles remain unchanged
-              minHeight: "70px",
-              "& .MuiTab-root": {
-                fontSize: { xs: "0.9rem", md: "1rem" },
-                fontWeight: "600",
-                color: "#94a3b8",
-                textTransform: "none",
-                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                padding: "20px 0",
-                zIndex: 1,
-                margin: "8px",
-                borderRadius: "12px",
-                "&:hover": {
-                  color: "#ffffff",
-                  backgroundColor: "rgba(58, 131, 246, 0.1)",
-                  transform: "translateY(-2px)",
-                  "& .lucide": {
-                    transform: "scale(1.1) rotate(5deg)",
-                  },
-                },
-                "&.Mui-selected": {
-                  color: "#fff",
-                  background: "linear-gradient(135deg, rgba(9, 180, 214, 0.2), rgba(58, 131, 246, 0.2))",
-                  boxShadow: "0 4px 15px -3px rgba(9, 180, 214, 0.2)",
-                  "& .lucide": {
-                    color: "#09b4d6",
-                  },
-                },
-              },
-              "& .MuiTabs-indicator": {
-                height: 0,
-              },
-              "& .MuiTabs-flexContainer": {
-                gap: "8px",
-              },
-            }}
+            sx={{ ...tabsSx, "--tab-accent": `var(--accent-${value + 1})` }}
           >
             <Tab
-              icon={<Code className="mb-2 w-5 h-5 transition-all duration-300" />}
+              icon={<Code className="w-5 h-5 transition-all duration-300" strokeWidth={1.5} />}
               label="Projects"
               {...a11yProps(0)}
             />
             <Tab
-              icon={<Award className="mb-2 w-5 h-5 transition-all duration-300" />}
+              icon={<Award className="w-5 h-5 transition-all duration-300" strokeWidth={1.5} />}
               label="Certificates"
               {...a11yProps(1)}
             />
             <Tab
-              icon={<Boxes className="mb-2 w-5 h-5 transition-all duration-300" />}
+              icon={<Boxes className="w-5 h-5 transition-all duration-300" strokeWidth={1.5} />}
               label="Tech Stack"
               {...a11yProps(2)}
             />
           </Tabs>
         </AppBar>
 
+        <div ref={bodyScope}>
         <SwipeableViews
           axis={theme.direction === "rtl" ? "x-reverse" : "x"}
           index={value}
           onChangeIndex={setValue}
         >
           <TabPanel value={value} index={0} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
-                {displayedProjects.map((project, index) => (
-                  <div
-                    key={project.id || index}
-                    data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}
-                    data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
-                  >
-                    <CardProject
-                      Img={project.Img}
-                      Title={project.Title}
-                      Description={project.Description}
-                      Link={project.Link}
-                      id={project.id}
-                    />
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
+              {displayedProjects.map((project, index) => (
+                <div key={project.id || index} data-reveal>
+                  <CardProject
+                    Img={project.Img}
+                    Title={project.Title}
+                    Description={project.Description}
+                    Link={project.Link}
+                    id={project.id}
+                    index={index}
+                    TechStack={project.TechStack}
+                  />
+                </div>
+              ))}
             </div>
             {projects.length > initialItems ? (
               <div className="mt-6 w-full flex justify-start">
@@ -319,18 +273,12 @@ export default function FullWidthTabs() {
           </TabPanel>
 
           <TabPanel value={value} index={1} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 md:gap-5 gap-4">
-                {displayedCertificates.map((certificate, index) => (
-                  <div
-                    key={index}
-                    data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}
-                    data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
-                  >
-                    <Certificate ImgSertif={certificate.Img} />
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
+              {displayedCertificates.map((certificate, index) => (
+                <div key={index} data-reveal>
+                  <Certificate ImgSertif={certificate.Img} index={index} />
+                </div>
+              ))}
             </div>
             {certificates.length > initialItems ? (
               <div className="mt-6 w-full flex justify-start">
@@ -343,22 +291,17 @@ export default function FullWidthTabs() {
           </TabPanel>
 
           <TabPanel value={value} index={2} dir={theme.direction}>
-            <div className="container mx-auto flex justify-center items-center overflow-hidden pb-[5%]">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 lg:gap-8 gap-5">
-                {techStacks.map((stack, index) => (
-                  <div
-                    key={index}
-                    data-aos={index % 3 === 0 ? "fade-up-right" : index % 3 === 1 ? "fade-up" : "fade-up-left"}
-                    data-aos-duration={index % 3 === 0 ? "1000" : index % 3 === 1 ? "1200" : "1000"}
-                  >
-                    <TechStackIcon TechStackIcon={stack.icon} Language={stack.language} />
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-2 border-l border-t border-hair-strong md:grid-cols-3 lg:grid-cols-6">
+              {techStacks.map((stack, index) => (
+                <div key={index} data-reveal>
+                  <TechStackIcon TechStackIcon={stack.icon} Language={stack.language} index={index} />
+                </div>
+              ))}
             </div>
           </TabPanel>
         </SwipeableViews>
+        </div>
       </Box>
-    </div>
+    </Section>
   );
 }
