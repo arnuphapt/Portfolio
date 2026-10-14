@@ -15,13 +15,12 @@ No test suite is configured.
 
 ## Architecture
 
-Single-page portfolio app built with **React 18 + Vite + Tailwind CSS**. Three routes:
+Single-page portfolio app built with **React 18 + Vite + Tailwind CSS**. Two routes:
 
 | Route | Component | Purpose |
 |-------|-----------|---------|
 | `/` | `LandingPage` | Full portfolio (Home → About → Portfolio → Contact sections) |
 | `/project/:id` | `ProjectDetails` | Individual project detail page |
-| `/admin` | `Admin` | CMS dashboard to add projects/certificates |
 
 **`/` is a single scrollable page** — `Home`, `About`, `Portofolio`, `ContactPage` are stacked vertically, not separate routes. Sections use anchor IDs (`#Home`, `#About`, `#Portofolio`, `#Contact`) for Navbar links.
 
@@ -32,7 +31,7 @@ Two Firebase instances are initialized separately to avoid collision:
 - `src/firebase.js` — default app, used for projects/certificates (Firestore + Storage)
 - `src/firebase-comment.js` — named `'comments-app'`, used for comments (Firestore + Storage)
 
-Data (projects, certificates, comments) is stored in **Firestore**; images are stored in **Firebase Storage**. The Admin page writes to Firestore; Portfolio/About pages read from it.
+Data (projects, certificates, comments) is stored in **Firestore**; images are stored in **Firebase Storage**. Data is managed directly in Firestore (no admin UI); the site is read-only and Portfolio/About pages read from it.
 
 ### Key Component Relationships
 

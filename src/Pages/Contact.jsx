@@ -8,7 +8,7 @@ const SOCIAL = [
     name: "LinkedIn",
     handle: "Arnuphap Thaiwong",
     sub: "Let's connect professionally",
-    url: "https://www.linkedin.com/in/arnuphap-thaiwong-a16662359/",
+    url: "https://www.linkedin.com/in/anuphap-thaiwong-358782443/",
     Icon: Linkedin,
   },
   {

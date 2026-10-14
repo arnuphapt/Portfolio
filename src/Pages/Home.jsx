@@ -47,7 +47,7 @@ const WORDS = ["Computer science Student", "Full-stack Developer", "CP Student"]
 const TECH_STACK = ["Next.js", "Typescript", "Nest.js", "MySql", "Postgresql"];
 const SOCIAL_LINKS = [
   { icon: Github, link: "https://github.com/arnuphapt", label: "GitHub" },
-  { icon: Linkedin, link: "https://www.linkedin.com/in/arnuphap-thaiwong-a16662359/", label: "LinkedIn" },
+  { icon: Linkedin, link: "https://www.linkedin.com/in/anuphap-thaiwong-358782443/", label: "LinkedIn" },
   { icon: Instagram, link: "https://www.instagram.com/parxdice_", label: "Instagram" }
 ];
 

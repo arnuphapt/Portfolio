@@ -12,7 +12,6 @@ import { AnimatePresence } from 'framer-motion';
 
 const Portofolio = lazy(() => import("./Pages/Portofolio"));
 const ProjectDetails = lazy(() => import("./components/ProjectDetail"));
-const Admin = lazy(() => import("./Pages/Admin/Admin"));
 
 const LandingPage = ({ showWelcome, setShowWelcome }) => {
   return (
@@ -75,7 +74,6 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage showWelcome={showWelcome} setShowWelcome={setShowWelcome} />} />
           <Route path="/project/:id" element={<ProjectPageLayout />} />
-          <Route path="/admin" element={<Admin />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
