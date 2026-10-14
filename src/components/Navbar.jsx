@@ -79,7 +79,7 @@ const Navbar = () => {
       </nav>
 
       {/* Dock */}
-      <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2">
+      <div className="fixed bottom-5 left-1/2 z-50 hidden -translate-x-1/2 md:block">
         <div className="flex items-stretch border border-hair-strong bg-ink/95 backdrop-blur-sm">
           {navItems.map(({ href, label, Icon }, i) => {
             const id = href.replace("#", "");
