@@ -68,7 +68,7 @@ const Navbar = () => {
                 onClick={e => scrollToSection(e, "#Home")}
                 className="display text-lg !tracking-[0.02em]"
               >
-                ARNUPHAP
+                ANUPHAP
               </a>
             </div>
             <span className="hud">

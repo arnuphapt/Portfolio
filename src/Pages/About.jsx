@@ -34,7 +34,7 @@ const ProfileImage = memo(() => (
     </div>
     <div className="mt-3 flex items-center justify-between">
       <Hud>FIG. 02</Hud>
-      <Hud>PORTRAIT / ARNUPHAP T.</Hud>
+      <Hud>PORTRAIT / ANUPHAP T.</Hud>
     </div>
   </div>
 ));
@@ -128,7 +128,7 @@ const AboutPage = () => {
               <h2 data-reveal className="display text-[clamp(1.9rem,4.2vw,3.25rem)]">
                 <span className="contrast">Hello,</span> I'm
                 <span className="mt-2 block bg-[linear-gradient(90deg,var(--accent),var(--accent-3),var(--accent-2))] bg-clip-text text-transparent">
-                  Arnuphap thaiwong
+                  Anuphap Thaiwong
                 </span>
               </h2>
 

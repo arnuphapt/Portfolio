@@ -36,7 +36,7 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
               <span className="hud block text-center">
                 © 2025{" "}
                 <a href="https://flowbite.com/" className="hover:text-fg">
-                  Arnuphap™
+                  Anuphap™
                 </a>
                 . All Rights Reserved.
               </span>
@@ -56,7 +56,7 @@ const ProjectPageLayout = () => (
         <span className="hud block text-center">
           © 2025{" "}
           <a href="https://flowbite.com/" className="hover:text-fg">
-            Arnuphap™
+            Anuphap™
           </a>
           . All Rights Reserved.
         </span>

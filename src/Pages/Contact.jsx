@@ -6,7 +6,7 @@ import { useReveal } from "../lib/useReveal";
 const SOCIAL = [
   {
     name: "LinkedIn",
-    handle: "Arnuphap Thaiwong",
+    handle: "Anuphap Thaiwong",
     sub: "Let's connect professionally",
     url: "https://www.linkedin.com/in/anuphap-thaiwong-358782443/",
     Icon: Linkedin,
@@ -27,9 +27,9 @@ const SOCIAL = [
   },
   {
     name: "Email",
-    handle: "arnuphap.t@kkumail.com",
+    handle: "anuphap.th02@gmail.com",
     sub: "Drop me a message",
-    url: "mailto:arnuphap.t@kkumail.com",
+    url: "mailto:anuphap.th02@gmail.com",
     Icon: Mail,
   },
 ];
@@ -78,7 +78,7 @@ const ContactPage = () => {
               </div>
               <div className="chip !normal-case !tracking-normal !text-sm">
                 <Mail className="h-4 w-4 text-fg-3" strokeWidth={1.5} />
-                arnuphap.t@kkumail.com
+                anuphap.th02@gmail.com
               </div>
             </div>
 

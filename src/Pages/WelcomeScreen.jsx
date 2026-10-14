@@ -97,7 +97,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
           <div className="relative flex min-h-screen flex-col px-5 py-6 sm:px-8">
             {/* top HUD */}
             <motion.div {...motionProps(0)} className="mx-auto w-full max-w-rail">
-              <HudStrip left="ARNUPHAP / BOOT" right="EST. 2021" />
+              <HudStrip left="ANUPHAP / BOOT" right="EST. 2021" />
             </motion.div>
 
             <div className="mx-auto flex w-full max-w-rail flex-1 items-center justify-center">
