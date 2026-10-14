@@ -31,6 +31,7 @@ const MINORS = Array.from({ length: 101 }, (_, i) => i);
 const SECTIONS = [
   { id: "Home", label: "HOME" },
   { id: "About", label: "ABOUT" },
+  { id: "AI", label: "AI" },
   { id: "Portofolio", label: "PORTFOLIO" }, // id spelling matches the DOM
   { id: "Contact", label: "CONTACT" },
 ];

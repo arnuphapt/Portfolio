@@ -3,6 +3,7 @@ import React, { useState, lazy, Suspense } from 'react';
 import "./index.css";
 import Home from "./Pages/Home";
 import About from "./Pages/About";
+import AI from "./Pages/AI";
 import AnimatedBackground from "./components/Background";
 import Navbar from "./components/Navbar";
 import ScrollRuler from "./components/ScrollRuler";
@@ -29,6 +30,7 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
           <AnimatedBackground />
           <Home />
           <About />
+          <AI />
           <Portofolio />
           <ContactPage />
           <footer className="border-t border-hair pb-28 pt-6">
