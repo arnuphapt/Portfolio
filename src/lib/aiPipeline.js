@@ -68,8 +68,20 @@ export const PHASES = [
         details: ["did it land?", "does it behave?", "real browser when user-facing"],
         agents: [{ name: "Tester" }],
       },
+    ],
+  },
+  {
+    title: "Ship",
+    accent: 4, // skip accent-4: amber is the fail colour
+    stages: [
       {
         n: "08",
+        name: "Commit",
+        details: ["feature branch only, never dev / main", "rebase on fresh dev", "push"],
+        agents: [{ name: "Main Agent", role: "on my go-ahead", direct: true }],
+      },
+      {
+        n: "09",
         name: "Retro",
         details: ["session log", "lessons feed back into the agents' rules"],
         agents: [{ name: "Vault-keeper", role: "notes" }],
@@ -78,8 +90,8 @@ export const PHASES = [
   },
 ];
 
-// Flat stage list (index 0..7) carrying the phase index.
-export const STAGES = PHASES.flatMap((p, phase) => p.stages.map((s) => ({ ...s, phase })));
+// Flat stage list carrying the phase index and its accent index.
+export const STAGES = PHASES.flatMap((p, phase) => p.stages.map((s) => ({ ...s, phase, accent: p.accent ?? phase })));
 export const TOTAL_STAGES = STAGES.length;
 export const MAX_ROUNDS = 3;
 const LAST = STAGES.length - 1;
@@ -142,6 +154,6 @@ export const readoutOf = (s) => {
   const round = `ROUND ${s.round}/${MAX_ROUNDS}`;
   if (s.mode === "fail") return `${at} · FAIL · ${round}`;
   if (s.mode === "back") return `RETURNING → ${STAGES[IMPL].n} ${STAGES[IMPL].name.toUpperCase()} · ${round}`;
-  if (s.i === LAST && s.mode === "sit") return `${at} · SHIPPED · ${round}`;
+  if (s.i === LAST && s.mode === "sit") return `${at} · DONE · ${round}`;
   return `${at} · ${round}`;
 };
