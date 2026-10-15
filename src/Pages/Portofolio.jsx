@@ -18,6 +18,14 @@ import { Code, Award, Boxes } from "lucide-react";
 
 const pad = (n) => String(n).padStart(2, "0");
 
+// Firestore project doc ids shown under "Professional"; every other project falls under "Side Projects"
+const PROFESSIONAL_IDS = new Set([
+  "fZQcTuZVQ9uC2jmxufpi", // e-Seed Analysis Certificate
+  "QCJxvf7pTkUnZyruy7bA", // DOA-RIBS
+  "6drjp0f15i81DZEf9tkH", // E-learning SMAC
+  "EElKa3zsbjwNsZbFXFCR", // SMNC Dashboard
+]);
+
 // Separate ShowMore/ShowLess button component
 const ToggleButton = ({ onClick, isShowingMore }) => (
   <button onClick={onClick} className="btn group">
@@ -129,7 +137,6 @@ export default function FullWidthTabs() {
   const [value, setValue] = useState(0);
   const [projects, setProjects] = useState([]);
   const [certificates, setCertificates] = useState([]);
-  const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllCertificates, setShowAllCertificates] = useState(false);
   const [initialItems] = useState(() => window.innerWidth < 768 ? 4 : 6);
 
@@ -170,21 +177,21 @@ export default function FullWidthTabs() {
     setValue(newValue);
   };
 
-  const toggleShowMore = useCallback((type) => {
-    if (type === 'projects') {
-      setShowAllProjects(prev => !prev);
-    } else {
-      setShowAllCertificates(prev => !prev);
-    }
+  const toggleShowMore = useCallback(() => {
+    setShowAllCertificates(prev => !prev);
   }, []);
 
-  const displayedProjects = showAllProjects ? projects : projects.slice(0, initialItems);
+  // projects is already sorted by Order, filter keeps that order within each group
+  const projectGroups = [
+    { label: "Professional", items: projects.filter((p) => PROFESSIONAL_IDS.has(p.id)) },
+    { label: "Side Projects", items: projects.filter((p) => !PROFESSIONAL_IDS.has(p.id)) },
+  ];
   const displayedCertificates = showAllCertificates ? certificates : certificates.slice(0, initialItems);
 
   const headScope = useRef(null);
   const bodyScope = useRef(null);
   useReveal(headScope);
-  useReveal(bodyScope, [value, displayedProjects.length, displayedCertificates.length]);
+  useReveal(bodyScope, [value, projects.length, displayedCertificates.length]);
 
   return (
     <Section id="Portofolio" className="pb-24 pt-6">
@@ -247,29 +254,28 @@ export default function FullWidthTabs() {
           onChangeIndex={setValue}
         >
           <TabPanel value={value} index={0} dir={theme.direction}>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
-              {displayedProjects.map((project, index) => (
-                <div key={project.id || index} data-reveal>
-                  <CardProject
-                    Img={project.Img}
-                    Title={project.Title}
-                    Description={project.Description}
-                    Link={project.Link}
-                    id={project.id}
-                    index={index}
-                    TechStack={project.TechStack}
-                  />
+            {projectGroups.map((group) => (
+              <div key={group.label} className="mb-10 last:mb-0">
+                <div data-reveal className="mb-5">
+                  <HudStrip left={`${group.label} · ${pad(group.items.length)}`} />
                 </div>
-              ))}
-            </div>
-            {projects.length > initialItems ? (
-              <div className="mt-6 w-full flex justify-start">
-                <ToggleButton
-                  onClick={() => toggleShowMore('projects')}
-                  isShowingMore={showAllProjects}
-                />
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
+                  {group.items.map((project, index) => (
+                    <div key={project.id || index} data-reveal>
+                      <CardProject
+                        Img={project.Img}
+                        Title={project.Title}
+                        Description={project.Description}
+                        Link={project.Link}
+                        id={project.id}
+                        index={index}
+                        TechStack={project.TechStack}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ) : null}
+            ))}
           </TabPanel>
 
           <TabPanel value={value} index={1} dir={theme.direction}>
@@ -283,7 +289,7 @@ export default function FullWidthTabs() {
             {certificates.length > initialItems ? (
               <div className="mt-6 w-full flex justify-start">
                 <ToggleButton
-                  onClick={() => toggleShowMore('certificates')}
+                  onClick={toggleShowMore}
                   isShowingMore={showAllCertificates}
                 />
               </div>

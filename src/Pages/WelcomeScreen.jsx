@@ -1,35 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Code2, Github, Globe, User } from 'lucide-react';
-import { Cross, Hud, HudStrip } from '../components/hud';
+import { Cross, HudStrip } from '../components/hud';
 
+// Single clock: typing takes LOAD_MS, its completion starts the exit, which takes EXIT_MS.
 const LOAD_MS = 4000;
+const EXIT_MS = 1000;
+// Skip plays the same exit with every duration scaled by SKIP_SCALE (~0.43s total).
+const SKIP_SCALE = 0.3;
+const SKIP_EXIT_MS = 450;
 
-const TypewriterEffect = ({ text, still }) => {
-  const [displayText, setDisplayText] = useState(still ? text : '');
+/* eslint-disable react/prop-types */
+const TypewriterEffect = ({ text, still, durationMs, onDone }) => {
+  const [count, setCount] = useState(still ? text.length : 0);
+  const shown = still ? text : text.slice(0, count);
 
   useEffect(() => {
     if (still) return undefined;
-    let index = 0;
+    let n = 0;
     const timer = setInterval(() => {
-      if (index <= text.length) {
-        setDisplayText(text.slice(0, index));
-        index++;
-      } else {
+      n += 1;
+      setCount(n);
+      if (n >= text.length) {
         clearInterval(timer);
+        onDone?.();
       }
-    }, 260);
+    }, durationMs / text.length);
 
     return () => clearInterval(timer);
-  }, [text, still]);
+  }, [text, still, durationMs, onDone]);
 
   return (
     <span className="inline-block">
-      {displayText}
+      {shown}
       {still ? null : <span className="blink">_</span>}
     </span>
   );
 };
+/* eslint-enable react/prop-types */
 
 // eslint-disable-next-line react/prop-types
 const IconCell = ({ Icon, index }) => (
@@ -42,25 +50,73 @@ const IconCell = ({ Icon, index }) => (
 const WelcomeScreen = ({ onLoadingComplete }) => {
   const [isLoading, setIsLoading] = useState(true);
   const reduced = useReducedMotion();
+  const [skipped, setSkipped] = useState(false);
+  const doneRef = useRef(false);
+  const skippedRef = useRef(false);
+  const exitTimer = useRef();
+  const completeRef = useRef(onLoadingComplete);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setTimeout(() => {
-        onLoadingComplete?.();
-      }, 1000);
-    }, LOAD_MS);
+    completeRef.current = onLoadingComplete;
+  });
 
+  // Only exit path to the site: runs once (end of exit animation, or skip).
+  const finish = useCallback(() => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    clearTimeout(exitTimer.current);
+    completeRef.current?.();
+  }, []);
+
+  // Typing finished (or reduced-motion wait over): play exit, then finish.
+  const startExit = useCallback((ms = EXIT_MS) => {
+    if (doneRef.current || exitTimer.current) return;
+    setIsLoading(false);
+    exitTimer.current = setTimeout(finish, ms);
+  }, [finish]);
+
+  // Skip: render the full text first (the exiting node is frozen at its last render),
+  // then the effect below starts a fast exit. No-op once skipped or already exiting.
+  const skip = useCallback(() => {
+    if (reduced) return finish();
+    if (doneRef.current || exitTimer.current || skippedRef.current) return;
+    skippedRef.current = true;
+    setSkipped(true);
+  }, [reduced, finish]);
+
+  useEffect(() => {
+    if (skipped) startExit(SKIP_EXIT_MS);
+  }, [skipped, startExit]);
+
+  // Reduced motion: no typing, keep the same total wait.
+  useEffect(() => {
+    if (!reduced) return undefined;
+    const timer = setTimeout(startExit, LOAD_MS);
     return () => clearTimeout(timer);
-  }, [onLoadingComplete]);
+  }, [reduced, startExit]);
 
+  useEffect(() => () => clearTimeout(exitTimer.current), []);
+
+  // Skip with Enter / Space / Escape.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+        e.preventDefault();
+        skip();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [skip]);
+
+  // Exit variants take a scale (AnimatePresence `custom`) so skip can shorten them.
   const containerVariants = {
-    exit: {
+    exit: (s = 1) => ({
       opacity: 0,
       transition: reduced
         ? { duration: 0 }
-        : { duration: 0.8, ease: [0.76, 0, 0.24, 1], when: "beforeChildren", staggerChildren: 0.08 },
-    },
+        : { duration: 0.8 * s, ease: [0.76, 0, 0.24, 1], when: "beforeChildren", staggerChildren: 0.08 * s },
+    }),
   };
 
   const childVariants = {
@@ -70,20 +126,21 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
       opacity: 1,
       transition: reduced ? { duration: 0 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.12 },
     }),
-    exit: {
+    exit: (s = 1) => ({
       y: -16,
       opacity: 0,
-      transition: reduced ? { duration: 0 } : { duration: 0.4, ease: "easeInOut" },
-    },
+      transition: reduced ? { duration: 0 } : { duration: 0.4 * s, ease: "easeInOut" },
+    }),
   };
 
   const motionProps = (i) => ({ variants: childVariants, initial: reduced ? false : 'hidden', animate: 'show', custom: i });
 
   return (
-    <AnimatePresence>
+    <AnimatePresence custom={skipped ? SKIP_SCALE : 1}>
       {isLoading && (
         <motion.div
-          className="fixed inset-0 z-[70] bg-ink"
+          className="fixed inset-0 z-[70] cursor-pointer bg-ink"
+          onClick={skip}
           initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit="exit"
@@ -93,6 +150,7 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
           <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 42%, transparent 40%, rgba(0,0,0,0.6) 100%)" }} />
           <div className="rail pointer-events-none absolute inset-y-0 left-1/2 hidden -translate-x-1/2 border-x border-hair !px-0 md:block" />
           <div aria-hidden="true" className="grain" />
+          <button type="button" className="sr-only">Skip intro</button>
 
           <div className="relative flex min-h-screen flex-col px-5 py-6 sm:px-8">
             {/* top HUD */}
@@ -126,38 +184,14 @@ const WelcomeScreen = ({ onLoadingComplete }) => {
 
                 {/* Website Link */}
                 <motion.div {...motionProps(3)} className="text-center">
-                  <a
-                    href="https://arnuphapt.vercel.app"
-                    className="btn !normal-case !tracking-[0.08em]"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <div className="btn !normal-case !tracking-[0.08em]">
                     <Globe className="h-4 w-4 text-fg-2" strokeWidth={1.5} />
-                    <TypewriterEffect text="arnuphapt.portfolio" still={reduced} />
-                  </a>
+                    <TypewriterEffect text="anuphap.portfolio" still={reduced || skipped} durationMs={LOAD_MS} onDone={startExit} />
+                  </div>
                 </motion.div>
               </div>
             </div>
-
-            {/* bottom HUD: loading bar over the existing 4s delay */}
-            <motion.div {...motionProps(4)} className="mx-auto w-full max-w-rail">
-              <div className="mb-2 flex items-center justify-between">
-                <Hud>LOADING</Hud>
-                <Hud>SECTION 00</Hud>
-              </div>
-              <div className="h-px w-full bg-hair">
-                <div
-                  className="h-px bg-accent"
-                  style={{
-                    width: reduced ? '100%' : undefined,
-                    animation: reduced ? undefined : `welcome-load ${LOAD_MS}ms linear forwards`,
-                  }}
-                />
-              </div>
-            </motion.div>
           </div>
-
-          <style>{`@keyframes welcome-load { from { width: 0 } to { width: 100% } }`}</style>
         </motion.div>
       )}
     </AnimatePresence>
