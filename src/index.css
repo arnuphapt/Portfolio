@@ -367,6 +367,9 @@ body {
 	animation: shine 1.5s ease-in-out infinite;
 }
 
+@keyframes ai-rise { 0% { top: 100%; opacity: 0 } 15% { opacity: 1 } 85% { opacity: 1 } 100% { top: -4px; opacity: 0 } }
+@keyframes ai-in { 0% { right: 0; opacity: 0 } 20% { opacity: 1 } 100% { right: 100%; opacity: 0 } }
+
 /* Full, legible page with no animation */
 @media (prefers-reduced-motion: reduce) {
 	html {

@@ -31,23 +31,50 @@ const AgentChips = ({ agents }) => (
   </ul>
 );
 
-// Agent branch under a stage node (xl+): trunk from the node down, one tick per agent. Lights with the node.
+// Agent branch under a stage node (xl+): one tick per agent. Each chip draws its own trunk segment (first one up to the
+// node, last one stops at its tick) so the trunk ends exactly on the last tick whatever the chip heights. Lights with the node.
 const Branch = ({ agents, lit }) => {
   const line = lit ? "bg-[color:var(--card-accent)]" : "bg-hair-strong";
   return (
-    <ul className="relative ml-2 mt-1.5 hidden space-y-1.5 pl-2 pt-7 xl:block">
-      <span aria-hidden="true" className={`absolute bottom-3 left-0 top-0 w-px transition-colors duration-300 ${line}`} />
-      {agents.map((a) => (
+    <ul className="relative ml-2 mt-1.5 hidden space-y-2.5 pl-2 pt-10 xl:block">
+      {agents.map((a, index) => (
         <li
           key={a.name}
           className={`relative border bg-ink-2 px-1 py-1 font-mono text-[9.5px] leading-tight text-fg-2 ${
             a.direct ? "border-dashed" : ""
           } ${lit ? "border-[color:var(--card-accent)] text-fg" : "border-hair-strong"} transition-colors duration-300`}
         >
-          <span aria-hidden="true" className={`absolute -left-2 top-1/2 h-px w-2 transition-colors duration-300 ${line}`} />
+          {/* trunk segment: from the previous chip (first: from the node; ul mt + pt + border = 47px) down to this tick */}
+          <span
+            aria-hidden="true"
+            className={`absolute -left-2 w-px transition-colors duration-300 ${index === 0 ? "-top-[47px]" : "-top-3"} ${index === agents.length - 1 ? "bottom-1/2" : "bottom-0"} ${line}`}
+          />
+          <span aria-hidden="true" className={`absolute -left-2 top-1/2 h-px w-2 transition-colors duration-300 ${line}`}>
+            {lit && (
+              <span
+                aria-hidden="true"
+                className="absolute top-1/2 h-[3px] w-[3px] -translate-y-1/2 rounded-full bg-[color:var(--card-accent)]"
+                style={{
+                  animation: "ai-in 1.2s ease-in infinite",
+                  animationDelay: `${index * 0.15}s`,
+                  filter: "drop-shadow(0 0 3px var(--card-accent))",
+                }}
+              />
+            )}
+          </span>
           {a.name}
         </li>
       ))}
+      {/* track for the rising light only; after the chips so space-y and the first chip stay as laid out */}
+      <span aria-hidden="true" className="absolute -top-1.5 bottom-3 left-px w-px">
+        {lit && (
+          <span
+            aria-hidden="true"
+            className="absolute -left-px h-4 w-[3px] rounded-full bg-gradient-to-t from-transparent to-[color:var(--card-accent)]"
+            style={{ animation: "ai-rise 1.2s ease-in infinite", filter: "drop-shadow(0 0 3px var(--card-accent))" }}
+          />
+        )}
+      </span>
     </ul>
   );
 };
@@ -245,7 +272,7 @@ const AICompact = ({ state }) => {
         </button>
         <Branch agents={s.agents} lit={lit} />
         {i < STAGES.length - 1 && (
-          <span aria-hidden="true" data-link={i} className="absolute left-full top-7 h-px w-3 bg-hair-strong sm:w-4 xl:top-10" />
+          <span aria-hidden="true" data-link={i} className="absolute left-full top-7 h-px w-3 bg-hair-strong sm:w-4 xl:top-10 xl:w-5 2xl:w-7" />
         )}
       </div>
     );
@@ -259,7 +286,7 @@ const AICompact = ({ state }) => {
       {/* xl: one grid, ME/MAIN in column 1 of the node row so it stays level with the nodes above the agent branches */}
       <div
         style={{ "--n": STAGES.length }}
-        className="grid grid-cols-[repeat(var(--n),minmax(0,1fr))] gap-x-3 gap-y-3 sm:gap-x-4 xl:grid-cols-[auto_repeat(var(--n),minmax(0,1fr))]"
+        className="grid grid-cols-[repeat(var(--n),minmax(0,1fr))] gap-x-3 gap-y-3 sm:gap-x-4 xl:gap-x-5 xl:gap-y-5 2xl:gap-x-7 xl:grid-cols-[auto_repeat(var(--n),minmax(0,1fr))]"
       >
         <div className="col-span-full flex items-center gap-2 max-xl:mb-2 xl:col-span-1 xl:col-start-1 xl:row-start-2 xl:h-20 xl:self-start">
           <span className="bg-fg px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink">Me</span>
